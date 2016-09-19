@@ -5,7 +5,7 @@ import wiringpi
 import time
 import argparse
 
-
+''' Parsing args '''
 parser = argparse.ArgumentParser()
 parser.add_argument('-H', '--hys', default=5, type=int,
                     help='change hysteresis')
@@ -60,6 +60,7 @@ wiringpi.pwmWrite(fan_pin, 0)
 
 
 def fan(fan_value):
+    ''' Change speed function '''
     wiringpi.pwmWrite(fan_pin, fan_value)
 
 
@@ -71,9 +72,10 @@ def cputemp():
     f.close()
     return get_temp
 
-
+''' Initialization first variables '''
 temp = cputemp()
 fan(dict_table[temp])
+
 print('\nFAN CONTROL: Hysteresis: {0}\xb0C, Refresh rate: {1} sec, \
 Max temperature treshold: {2}\xb0C, \
 Disable fan at {3}\xb0C\n'.format(hys, ref, m_temp, d_temp))
