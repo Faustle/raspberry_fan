@@ -47,7 +47,7 @@ if d_temp < 40 or d_temp > 55:
 fan_pin  = 1
 temp = 0
 t = 0
-
+cur_speed = 0
 t_range = 640 // (m_temp-30)        # Create step speed list
 
 ''' Create table of temp and fan speed '''
@@ -83,13 +83,16 @@ Turn off fan at {3}\xb0C\n'.format(hys, ref, m_temp, d_temp))
 
 while True:
     temp = cputemp()
+    cur_speed = dict_table[temp]
     if temp >= t+hys or temp <= t-hys or t == 0:
-        fan(dict_table[temp])
+        fan(cur_speed)
         t = cputemp()
     if temp <= d_temp:
         t = temp
-        fan(0)
+        cur_speed = 0
+        fan(cur_speed)
     if args['verbose']:
-        print('Current = {0}\xb0C, Previus = {1}\xb0C, \
-Speed value = {2}, Hysteresis = {3}\xb0C'.format(temp, t, dict_table[temp], hys))
+        print('Current T = {0}\xb0C, Previus T = {1}\xb0C, \
+Speed = {2}, Hysteresis = {3}\xb0C, \u0394H = {5}\xb0C, \
+Turn off T = {4}\xb0C'.format(temp, t, cur_speed, hys, d_temp, temp-t))
     time.sleep(ref)
