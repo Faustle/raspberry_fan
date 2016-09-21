@@ -11,7 +11,7 @@ It is tested under Python 3.4
 
 You can install dependencies from Python Package Index (PyPI):
 
-    $ pip install daemonize wiringpi
+    $ pip3 install daemonize wiringpi
 
 ###Usage:
 
