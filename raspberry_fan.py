@@ -4,6 +4,9 @@
 import wiringpi
 import time
 import argparse
+import logging
+from datetime import datetime as dt
+from daemonize import Daemonize
 
 ''' Parsing args '''
 parser = argparse.ArgumentParser(description='PWM Auto adjust fan speed')
@@ -16,7 +19,9 @@ parser.add_argument('-m', '--max_temp', default=70, type=int, metavar='N',
 parser.add_argument('-d', '--turnoff', default=47, type=int, metavar='N',
                     help='turn off fan at, default: 47\xb0C')
 parser.add_argument('-v', '--verbose', action='store_true',
-                    help='print output')
+                    help='print output or logging in daemon mode')
+parser.add_argument('-D', '--daemon', action='store_true',
+                    help='run as daemon')
 args = parser.parse_args()
 args = vars(args)
 
@@ -59,6 +64,16 @@ wiringpi.wiringPiSetup()
 wiringpi.pinMode(fan_pin, 2)
 wiringpi.pwmWrite(fan_pin, 0)
 
+''' Daemon PID and logging init '''
+pid = '/tmp/r_fan.pid'
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+fh = logging.FileHandler('/var/log/r_fan.log', 'w')
+fh.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+keep_fds = [fh.stream.fileno()]
+
 
 def fan(fan_value):
     ''' Change speed function '''
@@ -76,23 +91,47 @@ def cputemp():
 ''' Initialization first variables '''
 temp = cputemp()
 fan(dict_table[temp])
+set_out = 'Current settings: Hysteresis: {0}\xb0C, ' \
+          'Refresh rate: {1} sec, ' \
+          'Maximum temperature threshold: {2}\xb0C, ' \
+          'Turn off fan at {3}\xb0C\n'.format(hys, ref, m_temp, d_temp)
 
-print('Current settings: Hysteresis: {0}\xb0C, Refresh rate: {1} sec, \
-Maximum temperature threshold: {2}\xb0C, \
-Turn off fan at {3}\xb0C\n'.format(hys, ref, m_temp, d_temp))
+''' Verbose out '''
+print(set_out)
+if args['daemon'] and args['verbose']:
+    logger.debug(set_out)
 
-while True:
-    temp = cputemp()
-    cur_speed = dict_table[temp]
-    if temp >= t+hys or temp <= t-hys or t == 0:
-        fan(cur_speed)
-        t = cputemp()
-    if temp <= d_temp:
-        t = temp
-        cur_speed = 0
-        fan(cur_speed)
-    if args['verbose']:
-        print('Current T = {0}\xb0C, Previus T = {1}\xb0C, \
-Speed = {2}, Hysteresis = {3}\xb0C, \u0394H = {5}\xb0C, \
-Turn off T = {4}\xb0C'.format(temp, t, cur_speed, hys, d_temp, temp-t))
-    time.sleep(ref)
+
+def main():
+    ''' Main function '''
+    while True:
+        global t
+        temp = cputemp()
+        cur_speed = dict_table[temp]
+
+        if temp >= t+hys or temp <= t-hys or t == 0:
+            fan(cur_speed)
+            t = cputemp()
+
+        if temp <= d_temp:
+            t = temp
+            cur_speed = 0
+            fan(cur_speed)
+
+        log_out = 'Current T = {0}\xb0C, Previus T = {1}\xb0C, ' \
+                  'Speed = {2}, Hysteresis = {3}\xb0C, \u0394H = {5}\xb0C, ' \
+                  'Turn off T = {4}\xb0C'.format(temp, t, cur_speed, hys,
+                                                 d_temp, temp-t)
+        if args['daemon'] and args['verbose']:
+            logger.debug('[{0}] {1}'.format(dt.now(), log_out))
+        elif args['verbose']:
+            print('[{0}] {1}'.format(dt.now(), log_out))
+
+        time.sleep(ref)
+
+if args['daemon']:
+    daemon = Daemonize(app='raspberry_fan', pid=pid, action=main,
+                       keep_fds=keep_fds)
+    daemon.start()
+else:
+    main()
