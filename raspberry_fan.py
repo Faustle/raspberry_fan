@@ -129,9 +129,9 @@ def main():
 
         time.sleep(ref)
 
+daemon = Daemonize(app='raspberry_fan', pid=pid, action=main, keep_fds=keep_fds)
+
 if args['daemon']:
-    daemon = Daemonize(app='raspberry_fan', pid=pid, action=main,
-                       keep_fds=keep_fds)
     daemon.start()
 else:
     main()
