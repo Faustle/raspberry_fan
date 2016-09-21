@@ -30,4 +30,4 @@ PWM out will use **GPIO18**
 
 ###Fan Connection:
 Fan must be connected via ***Logic N-Channel MOSFET Transistor ONLY*** (IRL... for example)!
-More information on http://elinux.org/RPi_GPIO_Interface_Circuits
+More information on http://elinux.org/RPi_GPIO_Interface_Circuits#Using_a_FET
