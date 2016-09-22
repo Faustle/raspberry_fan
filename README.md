@@ -1,6 +1,6 @@
 ###Raspberry Fan
 
-PWM Auto adjust fan speed for Raspberry Pi
+Automatic fan control with hardware PWM for Raspberry Pi
 
 ###Dependencies
 
