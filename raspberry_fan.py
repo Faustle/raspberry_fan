@@ -9,7 +9,7 @@ from datetime import datetime as dt
 from daemonize import Daemonize
 
 ''' Parsing args '''
-parser = argparse.ArgumentParser(description='PWM Auto adjust fan speed')
+parser = argparse.ArgumentParser(description='Automatic fan control with hardware PWM for Raspberry Pi')
 parser.add_argument('-H', '--hys', default=5, type=int, metavar='N',
                     help='hysteresis, default: 5\xb0C')
 parser.add_argument('-r', '--refresh', default=5, type=int, metavar='N',
