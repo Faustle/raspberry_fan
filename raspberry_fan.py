@@ -9,15 +9,16 @@ from datetime import datetime as dt
 from daemonize import Daemonize
 
 ''' Parsing args '''
-parser = argparse.ArgumentParser(description='Automatic fan control with hardware PWM for Raspberry Pi')
-parser.add_argument('-H', '--hys', default=5, type=int, metavar='N',
-                    help='hysteresis, default: 5\xb0C')
-parser.add_argument('-r', '--refresh', default=5, type=int, metavar='N',
-                    help='refresh rate, default: 5 sec')
-parser.add_argument('-m', '--max_temp', default=70, type=int, metavar='N',
-                    help='maximum temperature threshold, default: 70\xb0C')
-parser.add_argument('-d', '--turnoff', default=47, type=int, metavar='N',
-                    help='turn off fan at, default: 47\xb0C')
+parser = argparse.ArgumentParser(description='Automatic fan control with' \
+                                             'hardware PWM for Raspberry Pi')
+parser.add_argument('-H', '--hys', default=3, type=int, metavar='N',
+                    help='hysteresis, default: 3\xb0C')
+parser.add_argument('-r', '--refresh', default=10, type=int, metavar='N',
+                    help='refresh rate, default: 10 sec')
+parser.add_argument('-m', '--max_temp', default=60, type=int, metavar='N',
+                    help='maximum temperature threshold, default: 60\xb0C')
+parser.add_argument('-d', '--turnoff', default=45, type=int, metavar='N',
+                    help='turn off fan at, default: 45\xb0C')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help='print output or logging in daemon mode')
 parser.add_argument('-D', '--daemon', action='store_true',
@@ -29,24 +30,24 @@ args = vars(args)
 ''' and test values          '''
 hys = args['hys']
 if hys < 1 or hys > 10:
-    hys = 5
-    print("Hysteresis value not valid! Default value (5) will be used!")
+    hys = 3
+    print("Hysteresis value not valid! Default value (3) will be used!")
 
 ref = args['refresh']
 if ref < 1 or ref > 30:
-    ref = 5
-    print("Refresh rate value not valid! Default value (5) will be used!")
+    ref = 10
+    print("Refresh rate value not valid! Default value (10) will be used!")
 
 m_temp = args['max_temp']
 if m_temp < 60 or m_temp > 80:
-    m_temp = 70
-    print("Maximum temperature threshold value not valid! Default value (70) \
+    m_temp = 60
+    print("Maximum temperature threshold value not valid! Default value (60) \
 will be used!")
 
 d_temp = args['turnoff']
 if d_temp < 40 or d_temp > 55:
-    d_temp = 47
-    print("Turn off value not valid! Default value (47) will be used!")
+    d_temp = 45
+    print("Turn off value not valid! Default value (45) will be used!")
 
 ''' Init temperature and fan vars '''
 fan_pin  = 1
